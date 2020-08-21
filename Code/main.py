@@ -12,14 +12,13 @@ DS = 8
 
 today = ''
 
-# ===============================================================
-# Desc: Calcula el bonus de combate de un participante
-# Input:    name: Nombre del participante
-# Ouptut:   total: Suma total del bonus del participante
-# ===============================================================
-
 
 def getBonus(name):
+    # ===============================================================
+    # Desc: Calcula el bonus de combate de un participante
+    # Input:    name: Nombre del participante
+    # Ouptut:   total: Suma total del bonus del participante
+    # ===============================================================
     total = 50
     linea = getLine("Vivos", getLineNumber(name, "Vivos"))
     linea = linea.split(":")
@@ -198,7 +197,7 @@ def randomPlayer():
 # Ouptut:
 # ===============================================================
 def printDead(name):
-    file = open("Muertos", "a")    
+    file = open("Muertos", "a")
     file.write(getLine("Vivos", getLineNumber(name, "Vivos")))
     file.close()
 
@@ -489,7 +488,7 @@ def lootPlayer(alive, dead):
             newWeapon = True
             modifyLine(arma2, WEAPON, alive)
     add = int(getValue(alive, "Vivos", CS)) + int(getValue(dead, "Vivos", CS))
-    modifyLine(str(add), CS, alive)    
+    modifyLine(str(add), CS, alive)
     add = int(getValue(alive, "Vivos", DS)) + int(getValue(dead, "Vivos", DS))
     modifyLine(str(add), DS, alive)
 
@@ -523,7 +522,7 @@ def attack(player1, player2):
                 day.write(player1 + " ha cogido el arma ( " + getValue(player1,
                                                                        "Vivos", WEAPON) + " ) y las esferas a " + player2 + "\n")
             printDead(player2)
-            killPlayer(player2)            
+            killPlayer(player2)
             deadPlayer = True
         if (result2 and not(result1)):
             day.write(player2 + " ha matado a " + player1 + "\n")
@@ -532,7 +531,7 @@ def attack(player1, player2):
                 day.write(player2 + " ha cogido el arma ( " + getValue(player2,
                                                                        "Vivos", WEAPON) + " ) y las esferas a " + player1 + "\n")
             printDead(player1)
-            killPlayer(player1)            
+            killPlayer(player1)
             deadPlayer = True
     day.close()
 
