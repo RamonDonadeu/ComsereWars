@@ -1,0 +1,88 @@
+========================== Inicio Dia 2 ==========================
+
+========================== Marina ==========================
+Marina ha pronunciado Primer Ideal
+Marina se ha encontrado con Victor
+
+========================== Juan ==========================
+Juan ha pronunciado Primer Ideal
+Juan ha encontrado un Arco
+Juan se ha encontrado con Cristina
+Juan pelea contra Cristina
+Juan: 60% Success: False
+Cristina: 50% Success: True
+Cristina ha matado a Juan
+Cristina ha cogido el arma ( Arco ) y las esferas a Juan
+
+========================== Miquel ==========================
+Miquel ha pronunciado Primer Ideal
+Miquel se ha encontrado con Eva
+
+========================== Alex ==========================
+Alex ha pronunciado Primer Ideal
+Alex ha encontrado una Espada Esquirlada
+Alex no ha encontrado a nadie 
+
+========================== Albert ==========================
+Albert ha pronunciado Primer Ideal
+Albert se ha encontrado con Subnormalspren
+Albert pelea contra Subnormalspren
+Albert: 55% Success: False
+Subnormalspren: 50% Success: True
+Subnormalspren ha matado a Albert
+
+========================== SDalinar ==========================
+SDalinar ha pronunciado Primer Ideal
+SDalinar ha encontrado una Daga
+SDalinar no ha encontrado a nadie 
+
+========================== Nil ==========================
+Nil ha pronunciado Primer Ideal
+Nil ha encontrado una Daga
+Nil se ha encontrado con Jan
+Nil pelea contra Jan
+Nil: 58% Success: False
+Jan: 50% Success: False
+Nil: 58% Success: True
+Jan: 50% Success: False
+Nil ha matado a Jan
+
+========================== Alfredo ==========================
+Alfredo ha pronunciado Primer Ideal
+Alfredo ha encontrado una Espada
+Alfredo se ha encontrado con Alfonso
+Alfredo pelea contra Alfonso
+Alfredo: 64% Success: True
+Alfonso: 50% Success: True
+Alfredo: 64% Success: True
+Alfonso: 50% Success: False
+Alfredo ha matado a Alfonso
+
+========================== Raquel ==========================
+Raquel se ha encontrado con Sofia
+Raquel pelea contra Sofia
+Raquel: 50% Success: True
+Sofia: 50% Success: True
+Raquel: 50% Success: True
+Sofia: 50% Success: True
+Raquel: 50% Success: False
+Sofia: 50% Success: False
+Raquel: 50% Success: False
+Sofia: 50% Success: False
+Raquel: 50% Success: True
+Sofia: 50% Success: False
+Raquel ha matado a Sofia
+
+========================== Alberto ==========================
+Alberto ha pronunciado Primer Ideal
+Alberto se ha encontrado con Marcos
+
+========================== Ramon ==========================
+Ramon ha pronunciado Primer Ideal
+Ramon ha encontrado una Espada
+Ramon no ha encontrado a nadie 
+
+========================== Gemma ==========================
+Gemma ha pronunciado Primer Ideal
+Gemma ha encontrado una Daga
+Gemma no ha encontrado a nadie 
