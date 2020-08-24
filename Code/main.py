@@ -1,14 +1,12 @@
 import random
 # Global
 INDEX = NAME = 0
-WEAPON = PERCENTAGE = 1
-ARMOR = NOMBREIDEAL = 2
-KNIGHTORDER = 3
-WOUNDS = 4
-IDEAL = 5
-DAYACTION = 6
-CS = 7
-DS = 8
+WEAPON = PERCENTAGE = NUMBER = 1
+NOMBREIDEAL = KNIGHTORDER = 2
+WOUNDS = 3
+IDEAL = 4
+DAYACTION = 5
+HABILITY = 6
 
 today = ''
 
@@ -19,18 +17,34 @@ today = ''
 # ===============================================================
 
 
-def getBonus(name):
+def getBonus(name, action):
     total = 50
     linea = getLine("Vivos", getLineNumber(name, "Vivos"))
     linea = linea.split(":")
-    for value in linea:
-        add = getValue(value, "Combate", PERCENTAGE)
-        try:
-            add = int(add)
-            total += add
-        except:
-            add = 0
-
+    order = getValue(name, "Vivos", KNIGHTORDER)
+    if (action == "Kill" or action == "Wound"):
+        for value in linea:
+            add = getValue(value, "Combate", PERCENTAGE)
+            try:
+                add = int(add)
+                total += add
+            except:
+                add = 0
+        if (order == "Windrunner"):
+            total += 15
+        elif (order == "Stoneward"):
+            total += 10
+        elif(order == "Willshaper"):
+            total += 15
+        elif(order == "Skybreaker"):
+            total += 20
+        elif (order == "Dustbringer"):
+            total += 10
+    elif (action == "Scape"):
+        if (order == "Lightweaver"):
+            total += 20
+        if (order == "Truthwatcher"):
+            total += 10
     return total
 
 # ===============================================================
@@ -131,6 +145,25 @@ def getPercentageResult():
     return random.randint(0, 99)
 
 # ===============================================================
+# Desc: Comprueba si se puede hacer una accion
+# Input:    Accion que se va a comprobar
+# Ouptut:   True si se puede hacer la accion False si no.
+# ===============================================================
+
+
+def checkAction(actionNumber):
+    line = getLine("ActionsCounter", int(actionNumber+3))
+    name = line.split(":")[0]
+    remaining = int(getValue(name, "ActionsCounter", PERCENTAGE))
+    if(remaining):
+        modifyLine(str(remaining-1), NUMBER, name, "ActionsCounter")
+        modifyLine(str(int(getValue("Actions", "ActionsCounter", NUMBER))-1),
+                   NUMBER, "Actions", "ActionsCounter")
+    else:
+        return False
+    return True
+
+# ===============================================================
 # Desc: Comprueva si un numero esta por debajo de otro
 # Input:
 # Ouptut:
@@ -157,7 +190,7 @@ def getName(line):
 
 
 def doDayAction(name):
-    modifyLine("1", DAYACTION, name)
+    modifyLine("1", DAYACTION, name, "Vivos")
 
 # ===============================================================
 # Desc: Calcula un Porcentage y comprueba si es menor que el numero pasado por parametro
@@ -198,7 +231,7 @@ def randomPlayer():
 # Ouptut:
 # ===============================================================
 def printDead(name):
-    file = open("Muertos", "a")    
+    file = open("Muertos", "a")
     file.write(getLine("Vivos", getLineNumber(name, "Vivos")))
     file.close()
 
@@ -219,7 +252,7 @@ def allDayActions():
     return True
 
 # ===============================================================
-# Desc: Calcula si dos personajes luchan entre si.
+# Desc: Dos personajes luchan entre si y uno sale victorioso mientras otro muere
 # Input:    player1: Nombre del primer participante
 #           player2: Nombre del segudno participante
 # Ouptut:
@@ -228,11 +261,96 @@ def allDayActions():
 
 def fight(player1, player2):
     day = open(today, "a+")
-    if(getAndCheckPercentage("combatir", "Porcentajes")):
-        day.write(player1 + " pelea contra " + player2 + "\n")
-        day.close()
-        attack(player1, player2)
+    day.write(player1 + " pelea contra " + player2 + "\n")
+    day.close()
+    winner = getWinner(player1, player2, "Kill")
+    day = open(today, "a+")
+    if(winner == player1):
+        if ((getValue(player2, "Vivos", KNIGHTORDER) == "Edgedancer" and not(int(getValue(player2, "Vivos", HABILITY)))) or (getValue(player2, "Vivos", KNIGHTORDER) == "Dustbringer" and not(int(getValue(player2, "Vivos", HABILITY))))):
+            day.write("Antes de morir, "+player2 +
+                      " escapa con la habilidad de friccion")
+            modifyLine("1", HABILITY, player2, "Vivos")
+        else:
+            day.write(player1 + " ha matado a " + player2 + "\n")
+            loot = lootPlayer(player1, player2)
+            if(loot):
+                day.write(player1 + " ha cogido el arma ( " + getValue(player1,
+                                                                       "Vivos", WEAPON) + " ) y las esferas a " + player2 + "\n")
+            printDead(player2)
+            killPlayer(player2)
+            day.close()
+            sayIdeal(player1)
 
+    if(winner == player2):
+        if ((getValue(player1, "Vivos", KNIGHTORDER) == "Edgedancer" and not(int(getValue(player1, "Vivos", HABILITY)))) or (getValue(player1, "Vivos", KNIGHTORDER) == "Dustbringer" and not(int(getValue(player1, "Vivos", HABILITY))))):
+            day.write("Antes de morir, "+player1 +
+                      " escapa con la habilidad de friccion")
+            modifyLine("1", HABILITY, player1, "Vivos")
+        else:
+            day.write(player2 + " ha matado a " + player1 + "\n")
+            loot = lootPlayer(player2, player1)
+            if(loot):
+                day.write(player2 + " ha cogido el arma ( " + getValue(player2,
+                                                                       "Vivos", WEAPON) + " ) y las esferas a " + player1 + "\n")
+            printDead(player1)
+            killPlayer(player1)
+            day.close()
+            sayIdeal(player2)
+
+# ===============================================================
+# Desc: Dos personajes luchan entre si y uno huye
+# Input:    player1: Nombre del primer participante
+#           player2: Nombre del segudno participante
+# Ouptut:
+# ===============================================================
+
+
+def scape(player1, player2):
+    day = open(today, "a+")
+    day.write(player1 + " pelea contra " + player2 + "\n")
+    day.close()
+    winner = getWinner(player1, player2, "Scape")
+    day = open(today, "a+")
+    if(winner == player1):
+        day.write(player2 + " ha huido de " + player1 + "\n")
+        day.close()
+
+    if(winner == player2):
+        day.write(player1 + " ha huido de " + player2 + "\n")
+        day.close()
+
+# ===============================================================
+# Desc: Dos personajes luchan entre si y uno sale herido
+# Input:    player1: Nombre del primer participante
+#           player2: Nombre del segudno participante
+# Ouptut:
+# ===============================================================
+
+
+def wound(player1, player2):
+    day = open(today, "a+")
+    day.write(player1 + " pelea contra " + player2 + "\n")
+    day.close()
+    winner = getWinner(player1, player2, "Wound")
+    day = open(today, "a+")
+
+    if(winner == player1):
+        if (getValue(player2, "Vivos", KNIGHTORDER) == "Edgedancer" or getValue(player2, "Vivos", KNIGHTORDER) == "Trutwatcher"):
+            day.write(player2 + " ha sido heirdo por " + player1 +
+                      " pero se ha curado gracias a la potencia de Progresion\n")
+        else:
+            # TODO Herir
+            day.write(player2 + " ha sido heirdo por " + player1 + "\n")
+        day.close()
+
+    if(winner == player2):
+        if (getValue(player1, "Vivos", KNIGHTORDER) == "Edgedancer" or getValue(player1, "Vivos", KNIGHTORDER) == "Trutwatcher"):
+            day.write(player1 + " ha sido heirdo por " + player2 +
+                      " pero se ha curado gracias a la potencia de Progresion\n")
+        else:
+            # TODO Herir
+            day.write(player1 + " ha sido heirdo por " + player2 + "\n")
+        day.close()
 
 # ===============================================================
 # Desc: Modifica el valor de Accion diaria a 0 de todos lo personajes
@@ -245,7 +363,7 @@ def clearDayAction():
     files = open("Vivos", "r")
     next(files)
     for lines in files:
-        modifyLine("0", DAYACTION, lines.split(":")[0])
+        modifyLine("0", DAYACTION, lines.split(":")[0], "Vivos")
 
 
 # ===============================================================
@@ -289,15 +407,15 @@ def fileLengthy(fname):
 # ===============================================================
 
 
-def modifyLine(text, position, name):
-    modify = getLine("Vivos", getLineNumber(
-        name, "Vivos"))  # Buscamos la linea de la persona
+def modifyLine(text, position, name, file_name):
+    modify = getLine(file_name, getLineNumber(
+        name, file_name))  # Buscamos la linea de la persona
     modify = modify.split(":")  # La separamos
     modify[position] = text  # Escribimos en el arma
     separator = ":"
     modify = separator.join(modify)  # Juntamos el vector
     # Modificamos la linea
-    replaceLine("Vivos", getLineNumber(name, "Vivos"), modify)
+    replaceLine(file_name, getLineNumber(name, file_name), modify)
 
 # ===============================================================
 # Desc: Reemplaza una linea concreta con el texto pasado por parametro
@@ -327,24 +445,23 @@ def findWeapon(name):
     file = open('Vivos', 'a')
     day = open(today, "a+")
     betterWeapon = True
-    if(getAndCheckPercentage("conseguirArma", "Porcentajes")):  # LLamar a aplicarPorcentaje
-        getWeapon = False
-        while(not(getWeapon)):  # Mientras no se consiga un arma
-            armas = open('PorcentajesArmas', 'r')  # Abrir fichero de Armas
-            next(armas)
-            for line in armas:
-                if(getValue(name, "Vivos", WEAPON) == getName(line)):
-                    betterWeapon = False
+    getWeapon = False
+    while(not(getWeapon)):  # Mientras no se consiga un arma
+        armas = open('PorcentajesArmas', 'r')  # Abrir fichero de Armas
+        next(armas)
+        for line in armas:
+            if(getValue(name, "Vivos", WEAPON) == getName(line)):
+                betterWeapon = False
+                getWeapon = True
+            if (betterWeapon):
+                value = random.randint(0, 99)
+                # Si conseguimos el porcentaje del arma
+                if((value < int(line.split(':')[1])) and not(getWeapon)):
+                    modifyLine(getName(line), WEAPON, name, "Vivos")
+                    day.write(name + " ha encontrado " +
+                              line.split(":")[2] + "\n")
                     getWeapon = True
-                if (betterWeapon):
-                    value = random.randint(0, 99)
-                    # Si conseguimos el porcentaje del arma
-                    if((value < int(line.split(':')[1])) and not(getWeapon)):
-                        modifyLine(getName(line), WEAPON, name)
-                        day.write(name + " ha encontrado " +
-                                  line.split(":")[2] + "\n")
-                        getWeapon = True
-            armas.close()
+        armas.close()
     file.close()
     day.close()
 
@@ -357,17 +474,16 @@ def findWeapon(name):
 
 def findPlayer(name):
     day = open(today, "a+")
-    while(not(allDayActions()) and getAndCheckPercentage("encontrarPersona", "Porcentajes")):
+    while(not(allDayActions())):
         player = randomPlayer()
         if(not(checkDayAction(player))):
             while(player == name):
                 player = randomPlayer()
-            # Arma? DailyAction?
             doDayAction(player)
             day.write(name + " se ha encontrado con " + player + "\n")
             day.close()
             return player
-    day.write(name + " no ha encontrado a nadie \n")
+
 
 # ===============================================================
 # Desc: Prepara el archivo de Vivos
@@ -379,12 +495,12 @@ def findPlayer(name):
 def setup():
     file = open('Vivos', 'w')
     file.write(
-        "Name:Weapon:Armor:KnighOrder:Wounds:Ideal:DayAction:ChargedSpheres:DischargedSpheres:\n")
+        "Name:Weapon:KnighOrder:Wounds:Ideal:DayAction:Hability:\n")
 
     participantes = open("participantes", "r")
     for line in participantes:
-        file.write(line.split(":")[0]+":::::"+str(0)+":"+str(0)+":" + str(random.randint(1, 2)) +
-                   ":"+str(random.randint(1, 3))+":\n")
+        file.write(line.split(":")[0]+"::" + line.split(":")
+                   [1]+"::"+str(0)+":"+str(0)+":"+str(0)+":\n")
     participantes.close()
     file.close()
     file = open("Muertos", "w")
@@ -410,7 +526,8 @@ def sayIdeal(name):
             days.write(name + " ha pronunciado " +
                        getValue(ideal, "Ideales", NOMBREIDEAL) + "\n")
             days.close()
-            modifyLine(getValue(ideal, "Ideales", NOMBREIDEAL), IDEAL, name)
+            modifyLine(getValue(ideal, "Ideales", NOMBREIDEAL),
+                       IDEAL, name, "Vivos")
 
 # ===============================================================
 # Desc: Genera un archivo para un dia
@@ -487,11 +604,7 @@ def lootPlayer(alive, dead):
         if (getName(lines) == arma2 and not(betterWeapon)):
             arma1 = arma2
             newWeapon = True
-            modifyLine(arma2, WEAPON, alive)
-    add = int(getValue(alive, "Vivos", CS)) + int(getValue(dead, "Vivos", CS))
-    modifyLine(str(add), CS, alive)    
-    add = int(getValue(alive, "Vivos", DS)) + int(getValue(dead, "Vivos", DS))
-    modifyLine(str(add), DS, alive)
+            modifyLine(arma2, WEAPON, alive, "Vivos")
 
     return newWeapon
 
@@ -503,13 +616,13 @@ def lootPlayer(alive, dead):
 # ===============================================================
 
 
-def attack(player1, player2):
+def getWinner(player1, player2, action):
     # Ataque sigiloso
     day = open(today, "a+")
     deadPlayer = False
     while(not(deadPlayer)):
-        player1Bonus = getBonus(player1)
-        player2Bonus = getBonus(player2)
+        player1Bonus = getBonus(player1, action)
+        player2Bonus = getBonus(player2, action)
         result1 = checkPercentage(player1Bonus)
         result2 = checkPercentage(player2Bonus)
         day.write(player1 + ": " + str(player1Bonus) +
@@ -517,25 +630,20 @@ def attack(player1, player2):
         day.write(player2 + ": " + str(player2Bonus) +
                   "% Success: "+str(result2)+"\n")
         if (result1 and not(result2)):
-            day.write(player1 + " ha matado a " + player2 + "\n")
-            loot = lootPlayer(player1, player2)
-            if(loot):
-                day.write(player1 + " ha cogido el arma ( " + getValue(player1,
-                                                                       "Vivos", WEAPON) + " ) y las esferas a " + player2 + "\n")
-            printDead(player2)
-            killPlayer(player2)            
+            return(player1)
             deadPlayer = True
         if (result2 and not(result1)):
-            day.write(player2 + " ha matado a " + player1 + "\n")
-            loot = lootPlayer(player2, player1)
-            if(loot):
-                day.write(player2 + " ha cogido el arma ( " + getValue(player2,
-                                                                       "Vivos", WEAPON) + " ) y las esferas a " + player1 + "\n")
-            printDead(player1)
-            killPlayer(player1)            
+            return(player2)
             deadPlayer = True
     day.close()
 
+
+def dailysetup():
+    clearDayAction()
+    with open("ActionsPerDay") as f:
+        with open("ActionsCounter", "w") as f1:
+            for line in f:
+                f1.write(line)
 
 # ===============================================================
 # Desc: Calcula las acciones de cada personaje
@@ -545,37 +653,74 @@ def attack(player1, player2):
 
 
 def dayActions():
+
     files = open("Vivos", "r")
     lineas = fileLengthy("Vivos")
-    while(not(allDayActions())):
+    while(not(allDayActions()) and int(getValue("Actions", "ActionsCounter", NUMBER))):
         player = randomPlayer()
         if(not(checkDayAction(player))):
             doDayAction(player)
             day = open(today, "a+")
             day.write("\n========================== " +
                       player + " ==========================\n")
-            day.close()
-            sayIdeal(player)
-            findWeapon(player)
-            player2 = findPlayer(player)
-            if(player2):
-                fight(player, player2)
-
-# def combate(nombre1, nombre2):
-    # if(atack & atack):
-    #   if (Armaesquirlada)
-    #      if(ArmaduraEsquirlada)
-    #         Nada
-    #    probBajaDeVivir
-    # else(atack & fail)
-    #   if(espadaEsquirlada):
-    #      Muerto
-    # else:
-    #    herida grave o leve
+            actionDone = False
+            while(not(actionDone)):
+                action = random.randint(0, 4)
+                if action == 0:  # Arma
+                    available = checkAction(action)
+                    if(available):
+                        day.write("----------- ACCION ARMA ----------- \n")
+                        day.close()
+                        findWeapon(player)
+                        print("Arma")
+                        actionDone = True
+                elif action == 1:  # Encuentro
+                    available = checkAction(action)
+                    if(available):
+                        day.write("----------- ACCION ENCUENTRO -----------\n")
+                        day.close()
+                        player2 = findPlayer(player)
+                        if(player2):
+                            print("Encuentro")
+                            actionDone = True
+                elif action == 2:  # Combate
+                    available = checkAction(action)
+                    if(available):
+                        day.write("----------- ACCION COMBATE -----------\n")
+                        day.close()
+                        player2 = findPlayer(player)
+                        if(player2):
+                            print("Combate")
+                            fight(player, player2)
+                            day.close()
+                            actionDone = True
+                elif action == 3:  # Huida
+                    available = checkAction(action)
+                    if(available):
+                        day.write("----------- ACCION HUIR -----------\n")
+                        day.close()
+                        player2 = findPlayer(player)
+                        if(player2):
+                            print("Huida")
+                            scape(player, player2)
+                            actionDone = True
+                elif action == 4:  # Herido
+                    available = checkAction(action)
+                    if(available):
+                        day.write("----------- ACCION HERIR -----------\n")
+                        day.close()
+                        player2 = findPlayer(player)
+                        if(player2):
+                            print("Herido")
+                            wound(player, player2)
+                            actionDone = True
+                elif action == 5:
+                    day.close()
+                    actionDone = True
 
 
 if __name__ == '__main__':
     setup()
-    clearDayAction()
+    dailysetup()
     today = generateDay()
     dayActions()
