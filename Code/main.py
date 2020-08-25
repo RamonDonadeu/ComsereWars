@@ -1,4 +1,5 @@
 import random
+import os
 # Global
 INDEX = NAME = 0
 WEAPON = PERCENTAGE = NUMBER = 1
@@ -491,6 +492,16 @@ def findPlayer(name):
 # Ouptut:
 # ===============================================================
 
+def cleanDays():
+    lineas = fileLengthy("Dias")
+    while(lineas-1):
+        lineas -= 1
+        namefile = "Dia " + str(lineas)
+        os.remove(namefile)
+
+    file = open("Dias", "w")
+    file.write("Dia 0")
+
 
 def setup():
     file = open('Vivos', 'w')
@@ -540,7 +551,6 @@ def generateDay():
     # Limpiar dayActions?
     days = open("Dias", "r")
     dayNumber = 0
-    print(days)
     for line in days:
         dayNumber = line.split(' ')[1]
     if(not(int(dayNumber))):
@@ -638,6 +648,13 @@ def getWinner(player1, player2, action):
     day.close()
 
 
+def daybackup():
+    with open("Vivos") as f:
+        with open("VivosBackup", "w") as f1:
+            for line in f:
+                f1.write(line)
+
+
 def dailysetup():
     clearDayAction()
     with open("ActionsPerDay") as f:
@@ -664,7 +681,8 @@ def dayActions():
             day.write("\n========================== " +
                       player + " ==========================\n")
             actionDone = False
-            while(not(actionDone)):
+            while(not(actionDone) and not(allDayActions())):
+                day = open(today, "a+")
                 action = random.randint(0, 4)
                 if action == 0:  # Arma
                     available = checkAction(action)
@@ -672,7 +690,6 @@ def dayActions():
                         day.write("----------- ACCION ARMA ----------- \n")
                         day.close()
                         findWeapon(player)
-                        print("Arma")
                         actionDone = True
                 elif action == 1:  # Encuentro
                     available = checkAction(action)
@@ -681,7 +698,6 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            print("Encuentro")
                             actionDone = True
                 elif action == 2:  # Combate
                     available = checkAction(action)
@@ -690,9 +706,7 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            print("Combate")
                             fight(player, player2)
-                            day.close()
                             actionDone = True
                 elif action == 3:  # Huida
                     available = checkAction(action)
@@ -701,7 +715,6 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            print("Huida")
                             scape(player, player2)
                             actionDone = True
                 elif action == 4:  # Herido
@@ -711,16 +724,48 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            print("Herido")
                             wound(player, player2)
                             actionDone = True
                 elif action == 5:
                     day.close()
                     actionDone = True
+                day.close()
 
 
 if __name__ == '__main__':
-    setup()
-    dailysetup()
-    today = generateDay()
-    dayActions()
+    option = 1
+    while(option):
+        print("------------ Selecciona una opcion ------------\n 1.- Setup inicial \n 2.- Ejecutar dia \n 3.- Restablecer dia anterior\n 4.- Modificar datos\n 0.- Salir")
+        option = int(input())
+        if(option == 1):
+            seguro = 0
+            while(not(seguro == ("S")) and not(seguro == ("N"))):
+                print(
+                    "Seleccionar esta opcion borrara todos los dias y el progreso actual\nEstas seguro que quieres eliminarlo (S/N)")
+                seguro = input()
+                if(seguro == "S"):
+                    setup()
+                    cleanDays()
+                else:
+                    if(not(seguro == "N")):
+                        print("Opcion incorrecta\n")
+        elif (option == 2):
+            daybackup()
+            dailysetup()
+            today = generateDay()
+            dayActions()
+        elif (option == 3):
+            fd = open("Dias", "r")
+            d = fd.read()
+            fd.close()
+            m = d.split("\n")            
+            lastday = m[len(m)-1]
+            os.remove(lastday)
+            removeLastLine("Dias")
+            with open("VivosBackup") as f:
+                with open("Vivos", "w") as f1:
+                    for line in f:
+                        f1.write(line)
+
+            
+        
