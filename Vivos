@@ -1,14 +1,2 @@
-Name:Weapon:KnighOrder:Wounds:Ideal:DayAction:Hability:
-Ramon::Windrunner::0:1:0:
-Alfonso::Skybreaker::Primer Ideal:1:0:
-Alex::Skybreaker::0:1:0:
-Eva::Dustbringer::0:1:1:
-Raquel::Dustbringer::0:1:1:
-SDalinar::Edgedancer::Primer Ideal:1:0:
-Sofia::Edgedancer::0:1:1:
-Alberto::Truthwatcher::Primer Ideal:1:0:
-Juan::Lightweaver::Primer Ideal:1:0:
-Marcos::Lightweaver::0:1:0:
-Victor::Willshaper::Primer Ideal:1:0:
-Gemma::Willshaper::Primer Ideal:1:0:
-Miquel::Bondsmith::Primer Ideal:1:0:
+Name:Weapon:KnighOrder:Wounds:Ideal:DayAction:Hability:Kills:
+Cristina:Espada Esquirlada:Stoneward:leves:Quinto Ideal:1:0:7:

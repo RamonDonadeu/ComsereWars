@@ -1,7 +1,7 @@
-ActionName:Number:
-Actions:94:
-Weapon:0:
+ActionName:Number:Actions tiene que ser la suma de todas las acciones
+Actions:19:
+Weapon:3:
 Find:0:
-Kill:94:
-Scape:0:
-Wound:0:
+Kill:6:
+Scape:5:
+Wound:5:
