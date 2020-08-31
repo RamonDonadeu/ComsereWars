@@ -209,7 +209,11 @@ def dayActions():
                             if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER))):
                                 wound(player, player2)
                                 actionDone = True
-               
+                if(not(actionDone)):
+                    check=getLine("ActionsCounter", 2)
+                    if(check.split(":")[1]==0):
+                        actionDone==True
+
                 day.close()
 
 
@@ -245,7 +249,7 @@ def fight(player1, player2):
     if (getValue(player2, "Vivos", KNIGHTORDER) == "Elsecaller"):
         day = open(today, "a+")
         if(getValue(player2, "Vivos", WEAPON) == ""):
-            day.write(player2 + " va a moldear un arma:\n")
+            day.write(player2 + " va a moldear una espada:\n")
             day.close()
             modifyLine("Espada", WEAPON, player2, "Vivos")
 
@@ -314,12 +318,15 @@ def fight(player1, player2):
                     day = open(today, "a+")
                     day.write("Debido al poder de abrasion, " +
                               player1+" se ha matado a si mismo\n")
+                    printDead(player1)
                     killPlayer(player1)
+                    
             if (getValue(player1, "Vivos", KNIGHTORDER) == "Skybreaker"):
                 if(checkPercentage(5)):
                     day = open(today, "a+")
                     day.write("Debido al poder de abrasion, " +
                               player1+" se ha matado a si mismo\n")
+                    printDead(player1)
                     killPlayer(player1)
 
     if(winner == player2):
@@ -524,12 +531,10 @@ def getBonus(name, action):
         elif(order == "Willshaper"):
             total += 10
         elif(order == "Skybreaker"):
-            total += 12
+            total += 10
         elif (order == "Dustbringer"):
             total += 7
         elif (order == "Lightweaver"):
-            total += 5
-        elif (order == "Truthwatcher"):
             total += 5
     elif (action == "Scape"):
         if (order == "Lightweaver"):
@@ -804,18 +809,18 @@ def scape(player1, player2):
                       getValue(player2, "Vivos", WEAPON)+"\n")
             new = lootPlayer(player1, player2)
             if(new):
-                day.write(" y " + player1+" la coje")
+                day.write(" y " + player1+" la coje\n")
             modifyLine("", WEAPON, player2, "Vivos")
         day.close()
 
     if(winner == player2):
         day.write(player1 + " ha huido de " + player2 + "\n")
         if(not(getValue(player1, "Vivos", WEAPON) == "")):
-            day.write(player1 + "pierde el arma" +
+            day.write(player1 + "pierde el arma " +
                       getValue(player1, "Vivos", WEAPON))
             new = lootPlayer(player2, player1)
             if(new):
-                day.write(" y " + player2+" la coje")
+                day.write(" y " + player2+" la coje\n")
             modifyLine("", WEAPON, player1, "Vivos")
         day.close()
 
@@ -826,7 +831,7 @@ def setup():
         "Name:Weapon:KnighOrder:Wounds:Ideal:DayAction:Hability:Kills:\n")
     participantes = open("participantes", "r")
     for line in participantes:
-        file.write(line.split(":")[0]+"::" + line.split(":")
+        file.write(line.split(",")[0]+"::" + line.split(",")
                    [1]+"::Primer Ideal:"+str(0)+":"+str(0)+":"+str(0)+":\n")
     participantes.close()
     file.close()
