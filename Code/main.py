@@ -48,6 +48,18 @@ def checkAction(actionNumber):
     return True
 
 
+def returnAction(actionNumber):
+    line = getLine("ActionsCounter", int(actionNumber+3))
+    name = line.split(":")[0]
+    remaining = int(getValue(name, "ActionsCounter", PERCENTAGE))
+    if(remaining):
+        modifyLine(str(remaining+1), NUMBER, name, "ActionsCounter")
+        modifyLine(str(int(getValue("Actions", "ActionsCounter", NUMBER))+1),
+                   NUMBER, "Actions", "ActionsCounter")
+    else:
+        return False
+    return True
+
 # ===============================================================
 # Desc: Comprueva si un numero esta por debajo de otro
 # Input:
@@ -123,6 +135,9 @@ def cleanDays():
 def doDayAction(name):
     modifyLine("1", DAYACTION, name, "Vivos")
 
+def undoDayAction(name):
+    modifyLine("0", DAYACTION, name, "Vivos")
+
 
 def daybackup():
     with open("Vivos") as f:
@@ -160,8 +175,8 @@ def dayActions():
             actionDone = False
             while(not(actionDone) and not(allDayActions())):
                 day = open(today, "a+")
-                if(fileLengthy("Vivos")<4):
-                    action=2
+                if(fileLengthy("Vivos") < 4):
+                    action = 2
                 else:
                     action = random.randint(0, 4)
                 if action == 0:  # Arma
@@ -189,6 +204,13 @@ def dayActions():
                             if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER)) or fileLengthy("Vivos") < 17):
                                 fight(player, player2)
                                 actionDone = True
+                            else:
+                                returnAction(action)
+                                undoDayAction(player2)
+                                day = open(today, "a+")
+                                day.write("Accion cancelada porque son de la misma orden\n")
+                                day.close()
+
                 elif action == 3:  # Huida
                     available = checkAction(action)
                     if(available):
@@ -196,9 +218,15 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER))):
+                            if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER)) or fileLengthy("Vivos") < 17):
                                 scape(player, player2)
                                 actionDone = True
+                            else:
+                                returnAction(action)
+                                undoDayAction(player2)
+                                day = open(today, "a+")
+                                day.write("Accion cancelada porque son de la misma orden\n")
+                                day.close()
                 elif action == 4:  # Herido
                     available = checkAction(action)
                     if(available):
@@ -206,13 +234,19 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER))):
+                            if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER)) or fileLengthy("Vivos") < 17):
                                 wound(player, player2)
                                 actionDone = True
+                            else:
+                                returnAction(action)
+                                undoDayAction(player2)
+                                day = open(today, "a+")
+                                day.write("Accion cancelada porque son de la misma orden\n")
+                                day.close()
                 if(not(actionDone)):
-                    check=getLine("ActionsCounter", 2)
-                    if(int(check.split(":")[1])==0):
-                        actionDone=True
+                    check = getLine("ActionsCounter", 2)
+                    if(int(check.split(":")[1]) == 0):
+                        actionDone = True
 
                 day.close()
 
@@ -320,7 +354,7 @@ def fight(player1, player2):
                               player1+" se ha matado a si mismo\n")
                     printDead(player1)
                     killPlayer(player1)
-                    
+
             if (getValue(player1, "Vivos", KNIGHTORDER) == "Skybreaker"):
                 if(checkPercentage(5)):
                     day = open(today, "a+")
