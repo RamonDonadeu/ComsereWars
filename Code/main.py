@@ -211,8 +211,8 @@ def dayActions():
                                 actionDone = True
                 if(not(actionDone)):
                     check=getLine("ActionsCounter", 2)
-                    if(check.split(":")[1]==0):
-                        actionDone==True
+                    if(int(check.split(":")[1])==0):
+                        actionDone=True
 
                 day.close()
 
