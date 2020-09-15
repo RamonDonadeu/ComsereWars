@@ -9,6 +9,7 @@ IDEAL = 4
 DAYACTION = 5
 HABILITY = 6
 KILLS = 7
+TRAIDOR = 8
 
 today = ''
 
@@ -135,6 +136,7 @@ def cleanDays():
 def doDayAction(name):
     modifyLine("1", DAYACTION, name, "Vivos")
 
+
 def undoDayAction(name):
     modifyLine("0", DAYACTION, name, "Vivos")
 
@@ -201,14 +203,15 @@ def dayActions():
                         day.close()
                         player2 = findPlayer(player)
                         if(player2):
-                            if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER)) or fileLengthy("Vivos") < 17):
+                            if(not(getValue(player, "Vivos", KNIGHTORDER) == getValue(player2, "Vivos", KNIGHTORDER)) and not(getValue(player2, "Vivos", TRAIDOR)) or fileLengthy("Vivos") < 17):
                                 fight(player, player2)
                                 actionDone = True
                             else:
                                 returnAction(action)
                                 undoDayAction(player2)
                                 day = open(today, "a+")
-                                day.write("Accion cancelada porque son de la misma orden\n")
+                                day.write(
+                                    "Accion cancelada porque son de la misma orden\n")
                                 day.close()
 
                 elif action == 3:  # Huida
@@ -225,7 +228,8 @@ def dayActions():
                                 returnAction(action)
                                 undoDayAction(player2)
                                 day = open(today, "a+")
-                                day.write("Accion cancelada porque son de la misma orden\n")
+                                day.write(
+                                    "Accion cancelada porque son de la misma orden\n")
                                 day.close()
                 elif action == 4:  # Herido
                     available = checkAction(action)
@@ -241,7 +245,8 @@ def dayActions():
                                 returnAction(action)
                                 undoDayAction(player2)
                                 day = open(today, "a+")
-                                day.write("Accion cancelada porque son de la misma orden\n")
+                                day.write(
+                                    "Accion cancelada porque son de la misma orden\n")
                                 day.close()
                 if(not(actionDone)):
                     check = getLine("ActionsCounter", 2)
@@ -264,7 +269,7 @@ def fight(player1, player2):
     day = open(today, "a+")
     day.write(player1 + " pelea contra " + player2 + "\n")
     day.close()
-    if (getValue(player2, "Vivos", KNIGHTORDER) == "Windrunner"):
+    if (getValue(player2, "Vivos", KNIGHTORDER) == "Windrunner" and not(getValue(player2, "Vivos", TRAIDOR))):
         day = open(today, "a+")
         aux = player2
         player2 = findWindrunner(player2)
@@ -473,7 +478,7 @@ def findWindrunner(name):
     next(files)
     for lines in files:
         line = lines.split(":")
-        if(line[KNIGHTORDER] == "Windrunner" and not(int(line[DAYACTION]))):
+        if(line[KNIGHTORDER] == "Windrunner" and not(int(line[DAYACTION])) and not(getValue(name, "Vivos", TRAIDOR))):
             modifyLine("1", DAYACTION, line[NAME], "Vivos")
             return line[NAME]
     return name
@@ -862,11 +867,11 @@ def scape(player1, player2):
 def setup():
     file = open('Vivos', 'w')
     file.write(
-        "Name:Weapon:KnighOrder:Wounds:Ideal:DayAction:Hability:Kills:\n")
+        "Name:Weapon:KnighOrder:Wounds:Ideal:DayAction:Hability:Kills:Traidor:\n")
     participantes = open("participantes", "r")
     for line in participantes:
         file.write(line.split(",")[0]+"::" + line.split(",")
-                   [1]+"::Primer Ideal:"+str(0)+":"+str(0)+":"+str(0)+":\n")
+                   [1]+"::Primer Ideal:"+str(0)+":"+str(0)+":"+str(0)+":0:\n")
     participantes.close()
     file.close()
     file = open("Muertos", "w")
@@ -906,6 +911,20 @@ def sayIdeal(name):
                        IDEAL, name, "Vivos")
 
 
+def traicionar():
+    Correcto = False
+    while(not(Correcto)):
+        print("Introducir nombre del Traidor\n")
+        name=input()
+        if(name=="Exit"):
+            Correcto=True
+        elif (getLineNumber(name, "Vivos")):
+            modifyLine("1", TRAIDOR, name, "Vivos")
+            Correcto=True
+            print("Ramon ahora es un traidor\n")
+        else:
+            print("Ese nombre no existe, introduce otro nombre o Exit para salir\n")
+    
 # ===============================================================
 # Desc: Dos personajes luchan entre si y uno sale herido
 # Input:    player1: Nombre del primer participante
@@ -959,7 +978,7 @@ def wound(player1, player2):
 if __name__ == '__main__':
     option = 1
     while(option):
-        print("------------ Selecciona una opcion ------------\n 1.- Setup inicial \n 2.- Ejecutar dia \n 3.- Restablecer dia anterior\n 4.- Modificar datos\n 5.- Simulaciuon\n 0.- Salir")
+        print("------------ Selecciona una opcion ------------\n 1.- Setup inicial \n 2.- Ejecutar dia \n 3.- Restablecer dia anterior\n 4.- Modificar datos\n 5.- Simulaciuon\n 6.- Traicion\n 0.- Salir")
         option = int(input())
         if(option == 1):
             seguro = 0
@@ -1004,6 +1023,8 @@ if __name__ == '__main__':
             WS = 0
             SW = 0
             BS = 0
+            Sangre = 0
+            Hijos = 0
             winners = open("Winners", "a")
             stats = open("stats", "w")
             print("Cuantas simulaciones quieres hacer?\n")
@@ -1049,6 +1070,12 @@ if __name__ == '__main__':
                 if(winner[KNIGHTORDER] == "Bondsmith"):
                     BS += 1
                     print("Bondsmiths: "+str(BS)+"\n")
+                if(winner[KNIGHTORDER] == "Sangre"):
+                    Sangre += 1
+                    print("Sangre: "+str(Sangre)+"\n")
+                if(winner[KNIGHTORDER] == "Hijos"):
+                    Hijos += 1
+                    print("Hijos: "+str(Hijos)+"\n")
 
                 print(sim)
 
@@ -1063,5 +1090,9 @@ if __name__ == '__main__':
             print("Willshapers: "+str(WS)+"\n")
             print("Stonewards: "+str(SW)+"\n")
             print("Bondsmiths: "+str(BS)+"\n")
+            print("Sangre: "+str(Sangre)+"\n")
+            print("Hijos: "+str(Hijos)+"\n")
 
             winners.close()
+        elif (option == 6):
+            traicionar()
